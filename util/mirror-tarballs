@@ -359,6 +359,14 @@ mv agentzh-lua-resty-string-* lua-resty-string-$ver || exit 1
 
 #################################
 
+ver=7
+$root/util/get-tarball "http://github.com/ittner/lua-iconv/tarball/lua-iconv-$ver" -O "lua-iconv-$ver.tar.gz" || exit 1
+tar -xzf lua-iconv-$ver.tar.gz || exit 1
+mv ittner-lua-iconv-* lua-iconv-$ver || exit 1
+cd lua-iconv-$ver || exit 1
+patch -p1 < $root/patches/lua_iconv-$ver-makefile_install_fix.patch || exit 1
+cd ..
+
 rm *.tar.gz
 
 cd ..

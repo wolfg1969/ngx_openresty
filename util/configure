@@ -175,6 +175,9 @@ for my $opt (@ARGV) {
     } elsif ($opt eq '--without-lua_rds_parser') {
         $resty_opts{no_lua_rds_parser} = 1;
 
+    } elsif ($opt eq '--without-lua_iconv') {
+        $resty_opts{no_lua_iconv} = 1;
+
     } elsif ($opt eq '--with-debug') {
         $resty_opts{debug} = 1;
 
@@ -791,6 +794,56 @@ _EOC_
                     "\$(MAKE) install$extra_opts";
             }
         }
+
+        unless ($opts->{no_lua_iconv}) {
+            my $dir = auto_complete 'lua-iconv';
+            if (!defined $dir) {
+                die "No lua-iconv found";
+            }
+
+            my $lua_inc;
+            if ($opts->{luajit} || $opts->{luajit_path}) {
+                $lua_inc = $ENV{LUAJIT_INC};
+
+            } else {
+                $lua_inc = $ENV{LUA_INC};
+            }
+
+            my $extra_opts = " DESTDIR=\$(DESTDIR) LUA_INCLUDE_DIR=$lua_inc " .
+                "LUA_LIB_DIR=$lualib_prefix";
+
+            if ($on_solaris) {
+                $extra_opts .= " INSTALL=$root_dir/build/install";
+                if ($opts->{debug}) {
+                    $extra_opts .= " CFLAGS=\"-g -O0 -Wall -pedantic -DMISSING_ISINF\"";
+
+                } else {
+                    $extra_opts .= " CFLAGS=\"-g -O3 -Wall -pedantic -DMISSING_ISINF\"";
+                }
+
+            } else {
+                if ($opts->{debug}) {
+                    $extra_opts .= " CFLAGS=\"-g -O0 -Wall -pedantic\"";
+                }
+            }
+
+            if ($platform eq 'macosx') {
+                $extra_opts .= " LDFLAGS='-bundle -undefined dynamic_lookup'";
+            }
+
+            if (defined $cc) {
+                $extra_opts .= " CC=$cc";
+            } else {
+                $extra_opts .= " CC=gcc";
+            }
+
+            push @make_cmds, "cd $root_dir/build/$dir && ".
+                "\$(MAKE)$extra_opts";
+
+            push @make_install_cmds, "cd $root_dir/build/$dir && " .
+                "\$(MAKE) install$extra_opts";
+        }
+
     }
 
     # prepare nginx configure line
@@ -897,6 +950,7 @@ _EOC_
   --without-lua_resty_mysql          disable the lua-resty-mysql library
   --without-lua_resty_upload         disable the lua-resty-upload library
   --without-lua_resty_string         disable the lua-resty-string library
+  --without-lua_iconv                disable the lua-iconv library
 
   --without-lua51                    disable the bundled Lua 5.1 interpreter
   --with-lua51=PATH                  specify the external installation of Lua 5.1 by PATH
