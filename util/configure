@@ -175,8 +175,8 @@ for my $opt (@ARGV) {
     } elsif ($opt eq '--without-lua_rds_parser') {
         $resty_opts{no_lua_rds_parser} = 1;
 
-    } elsif ($opt eq '--without-lua_iconv') {
-        $resty_opts{no_lua_iconv} = 1;
+    } elsif ($opt eq '--with-lua_iconv') {
+        $resty_opts{lua_iconv} = 1;
 
     } elsif ($opt eq '--with-debug') {
         $resty_opts{debug} = 1;
@@ -795,7 +795,7 @@ _EOC_
             }
         }
 
-        unless ($opts->{no_lua_iconv}) {
+        if ($opts->{lua_iconv}) {
             my $dir = auto_complete 'lua-iconv';
             if (!defined $dir) {
                 die "No lua-iconv found";
@@ -950,7 +950,8 @@ _EOC_
   --without-lua_resty_mysql          disable the lua-resty-mysql library
   --without-lua_resty_upload         disable the lua-resty-upload library
   --without-lua_resty_string         disable the lua-resty-string library
-  --without-lua_iconv                disable the lua-iconv library
+
+  --with-lua_iconv                   enable the lua-iconv library
 
   --without-lua51                    disable the bundled Lua 5.1 interpreter
   --with-lua51=PATH                  specify the external installation of Lua 5.1 by PATH
